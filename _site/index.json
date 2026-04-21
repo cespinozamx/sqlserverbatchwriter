@@ -1,0 +1,22 @@
+{
+  "README.html": {
+    "href": "README.html",
+    "title": "SqlServerBatchWriter | sqlserverbatchwriter",
+    "summary": "SqlServerBatchWriter SqlServerBatchWriter is an Scala library, engineered for high-volume bulk data loading from Azure Databricks to SQL Server Managed Instance, SQL Elastic Pool or Synapse. It implements the native TDS Bulk Load protocol via the ISQLServerBulkData API (mssql-jdbc 12.x) The library is structured around three top-level Scala objects and two top-level classes. BulkWorker is declared as a top-level object (outside SqlServerBatchWriter) to guarantee complete serialization in both Spark Connect environments (Standard cluster) and Dedicated Job Cluster, eliminating the Task not serializable error that affects any closure defined inside a notebook cell's enclosing class. Components SqlServerBatchWriter (object singleton) Public entry points, routing by volume, checkpoint orchestration, JDBC helpers. BulkWorker (object top-level) foreachPartition execution on Job Cluster workers. executeDirect, executeBlocks, loadPartition. SparkRowBulkRecord (class ISQLServerBulkData) Zero-copy bridge between Spark Array[Row] and the TDS BulkLoad protocol. No reflection. AppConfig (case class) Unified configuration for all four flows. All fields have safe defaults. RunResult (case class) Structured result: success/failed/pending counts, rowCount, errorMessage, runDate. Memory Management Strategy A key design decision in writeDirectBulk (Flow A) is the use of toLocalIterator() instead of collect(). Spark transfers one partition at a time to the driver, so the driver never materializes more than directBulkBatchSize rows simultaneously (approximately 30 MB per chunk). This is safe for parallel execution of multiple countries/models in the same cluster without risk of driver OOM. Flow A — Direct DataFrame to SQL Server Use runBatchLoadWithRetry(df, cfg) for any DataFrame under 50M rows. The method detects the volume automatically and calls writeDirectBulk. No Delta landing zone, no checkpoint required. Uses toLocalIterator() to stream partitions one at a time to the driver, then flushes each chunk via SQLServerBulkCopy. Suitable for catalogs, configuration tables, daily transactions, and incremental loads under 50M rows. Flow B — Parquet/Delta Landing Zone For volumes between 50M and 100M rows, runBatchLoad triggers the two-phase Parquet Landing flow. Phase 1 writes the DataFrame to a Delta table in ADLS Gen2, partitioned using NTILE on unique values of the business key column (e.g. CustomerId) — avoiding a full shuffle of 756M rows. Phase 2 reads partitions from Delta and executes BulkCopy in parallel. Two modes are available: driver-side (Standard cluster) and worker-side (Job Cluster Dedicated, recommended for production). Flow C — Pre-partitioned Delta Table with BLOCK column For the largest volumes (more than 100M rows), the external process applies NTILE and writes the Delta table with a BLOCK column. runFromDeltaBlocksWithRetry reads each block by ID using partition pruning and executes BulkCopy via a JDBC thread pool on the driver. No foreachPartition — driver-side pool, compatible with both Standard and Dedicated clusters. The workQueue pattern ensures each block is collected and immediately flushed before the next one is loaded, keeping driver heap usage bounded Stored Procedure execution Stored Procedures with IN/OUT ParametersexecuteStoredProc provides full support for SQL Server stored procedures with input parameters, output parameters, multiple result sets, configurable timeout, and automatic retry with exponential backoff."
+  },
+  "docs/getting-started.html": {
+    "href": "docs/getting-started.html",
+    "title": "Getting Started | sqlserverbatchwriter",
+    "summary": "Getting Started"
+  },
+  "docs/introduction.html": {
+    "href": "docs/introduction.html",
+    "title": "Introduction | sqlserverbatchwriter",
+    "summary": "Introduction"
+  },
+  "index.html": {
+    "href": "index.html",
+    "title": "This is the HOMEPAGE. | sqlserverbatchwriter",
+    "summary": "This is the HOMEPAGE. Refer to Markdown for how to write markdown files. Quick Start Notes: Add images to the images folder if the file is referencing an image."
+  }
+}
